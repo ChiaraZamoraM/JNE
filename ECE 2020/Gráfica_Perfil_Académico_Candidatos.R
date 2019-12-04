@@ -7,7 +7,8 @@ library(readr) # Cargar la librería gráfica "readr"
 datosACA=read.csv2("C:/Users/apoyo37dnef/Desktop/PerfilACA.csv", sep=",")
 datosACA$nivelACAD= factor(datosACA$nivelACAD, 
                                   levels = c(0:7),
-                                  labels = c("Sin educación", "Primaria", "Secundaria","Técnico", "Bachiller","Licenciado","Magister","Doctor"),
+                                  labels = c("Sin educación", "Primaria", "Secundaria","Técnico", "Bachiller","Licenciado",
+                                             "Magister","Doctor"),
                                   ordered=T)
 
 #Cambiar las etiquetas de los valores
