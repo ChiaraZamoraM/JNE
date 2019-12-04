@@ -1,7 +1,7 @@
 install.packages("ggplot2") #para gráficas
 install.packages("readr") #para lectura de BD en CSV
 library(ggplot2) # Cargar la librería gráfica "ggplot2"
-library(readr) # Cargar la librería gráfica "readr"
+library(readr) # Cargar la librería lectura BD "readr"
 
 #Llamar Base de Datos
 datosACA=read.csv2("C:/Users/apoyo37dnef/Desktop/PerfilACA.csv", sep=",")
