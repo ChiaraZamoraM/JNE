@@ -1,0 +1,173 @@
+### Hojas de Vida 2020
+
+```{r}
+library(rio)
+
+data <- import_list('Hojas de Vida ECE2020.xlsx',rbind=FALSE)
+```
+
+
+```{r}
+names(data)
+```
+
+```{r}
+str(data)
+```
+
+```{r}
+names(data$EDUCACIONBASICAS)
+```
+
+```{r}
+data$EDUCACIONBASICAS= data$EDUCACIONBASICAS[,-c(2:4,6,8:10)]
+names(data$EDUCACIONBASICAS)
+```
+
+```{r}
+data$EDUCACIONTECNICAS= data$EDUCACIONTECNICAS[,-c(2,4,7:12)]
+names(data$EDUCACIONTECNICAS)
+```
+
+```{r}
+data$EducacionUni= data$EducacionUni[,c(1,4:6,8:9)]
+names(data$EducacionUni)
+```
+
+```{r}
+data$EducacionPostgrado= data$EducacionPostgrado[,c(5,7,12)]
+names(data$EducacionPostgrado)
+```
+
+
+```{r}
+data$EDUCACIONBASICAS <- data$EDUCACIONBASICAS[!duplicated(data$EDUCACIONBASICAS), ]
+
+nrow(data$EDUCACIONBASICAS)
+```
+
+```{r}
+data$EDUCACIONTECNICAS<- data$EDUCACIONTECNICAS[!duplicated(data$EDUCACIONTECNICAS), ]
+
+nrow(data$EDUCACIONTECNICAS)
+```
+```{r}
+names(data$EducacionUni)
+```
+
+```{r}
+data$EducacionUni[2]= as.factor(ifelse(data$EducacionUni[2]=="SI", 1,0))
+levels(data$EducacionUni[2])=c("Con bachiller","Sin bachiller") #asignamos etiquetas
+
+data$EducacionUni<- data$EducacionUni[order(data$EducacionUni["IDHOJAVIDA"], data$EducacionUni["TXBACHILLER"], decreasing=TRUE),]
+
+data$EducacionUni1 <- data$EducacionUni[!duplicated(data$EducacionUni[1]),]
+
+nrow(data$EducacionUni1)
+```
+```{r}
+names(data$EducacionPostgrado)
+```
+
+
+```{r}
+data$EducacionPostgrado[3]= as.factor(ifelse(data$EducacionPostgrado[3]=="1", 1,0))
+levels(data$EducacionPostgrado[3])=c("Con posgrado","Sin posgrado") #asignamos etiquetas
+
+data$EducacionPostgrado<- data$EducacionPostgrado[order(data$EducacionPostgrado["IDHOJAVIDA"], data$EducacionPostgrado["FGTENGOPOSGRADO"], decreasing=TRUE),]
+
+data$EducacionPostgrado2 <- data$EducacionPostgrado[!duplicated(data$EducacionPostgrado[2]),]
+
+nrow(data$EducacionPostgrado2)
+```
+```{r}
+table(data$EducacionPostgrado2[3])
+```
+
+```{r}
+data_total=merge(data$EDUCACIONBASICAS,data$EDUCACIONTECNICAS,by="IDHOJAVIDA")
+```
+
+```{r}
+data_totalF=merge(data_total,data$EducacionUni1,by="IDHOJAVIDA")
+```
+
+```{r}
+data_totalFi=merge(data_totalF,data$EducacionPostgrado2,by="IDHOJAVIDA")
+```
+
+```{r}
+#### Merge
+
+library(readxl)
+Datos_Candidatos_ECE2020 <- read_excel("Datos Candidatos ECE2020.xlsx")
+head(Datos_Candidatos_ECE2020)
+```
+
+```{r}
+data_totalFinal=merge(data_totalFi,Datos_Candidatos_ECE2020,by.x="IDHOJAVIDA",by.y="IDHOJAVIDA...1",all.y=T)
+```
+
+```{r}
+names(Datos_Candidatos_ECE2020)
+```
+
+```{r}
+names(data_totalFinal)
+```
+
+*Ojo con el nivel 3*
+```{r}
+data_totalFinal$NivelEduc[data_totalFinal$TXCONCLUYOPRIMARIA== "NO"]  = "0"
+
+data_totalFinal$NivelEduc[data_totalFinal$TXCONCLUYOPRIMARIA== "SI"]  = "1"
+
+data_totalFinal$NivelEduc[data_totalFinal$TXCONCLUYOPRIMARIA== "SI"& data_totalFinal$TXCONCLUYOSECUNDARIA== "SI"]  = "2"
+
+data_totalFinal$NivelEduc[data_totalFinal$TXCONCLUYOPRIMARIA== "SI"&
+                          data_totalFinal$TXCONCLUYOSECUNDARIA== "SI"&
+                          data_totalFinal$FGTENGOEDUTECNICO=="1"|
+                          data_totalFinal$TXBACHILLER== "1"]  = "3"
+
+data_totalFinal$NivelEduc[data_totalFinal$TXCONCLUYOPRIMARIA== "SI" &
+                          data_totalFinal$TXCONCLUYOSECUNDARIA== "SI"&
+                          data_totalFinal$NivelEduc=="3"&
+                          data_totalFinal$FGTENGOPOSGRADO== "1"]  = "4"
+
+#Le damos formato:
+data_totalFinal$NivelEduc= factor(data_totalFinal$NivelEduc, 
+                        levels = c(0:4),
+                        labels = c("Sin educación", "Primaria", "Secundaria", "Estudios Postsecundarios","Posgrado"),
+                        ordered=T)
+str(data_totalFinal$NivelEduc)
+```
+
+
+```{r}
+table(data_totalFinal$NivelEduc)
+```
+
+#### Creación de variable Juventud
+
+```{r}
+str(data_totalFinal$NUEDAD)
+```
+
+
+```{r}
+data_totalFinal$Juventud= as.factor(ifelse(data_totalFinal$NUEDAD<=30, 1,0))
+levels(data_totalFinal$Juventud)=c("Joven","No joven") #asignamos etiquetas
+```
+
+```{r}
+str(data_totalFinal$NUEDAD)
+```
+
+```{r}
+table(data_totalFinal$Juventud)
+```
+
+```{r}
+table(data_totalFinal$Juventud,data_totalFinal$NivelEduc)
+```
+
