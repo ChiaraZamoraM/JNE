@@ -22,161 +22,114 @@ names(ece20)=c("EduBAS","EduTEC","EduUNI","EduPOST")
 
 
 ```{r}
-names(data$EDUCACIONBASICAS)
+names(ece20$EduBAS)
 ```
 
 ```{r}
-data$EDUCACIONBASICAS= data$EDUCACIONBASICAS[,-c(2:4,6,8:10)]
-names(data$EDUCACIONBASICAS)
+ece20$EduBAS= ece20$EduBAS[,-c(2:4,6,8:10)]
+names(ece20$EduBAS)
 ```
 
 ```{r}
-data$EDUCACIONTECNICAS= data$EDUCACIONTECNICAS[,-c(2,4,7:12)]
-names(data$EDUCACIONTECNICAS)
+Prim=ece20$EduBAS[ece20$EduBAS$TXCONCLUYOPRIMARIA=="SI",c(1,2)]
+Prim=Prim[!duplicated(Prim$IDHOJAVIDA),]
+Prim=Prim[complete.cases(Prim),]
+names(Prim)[2]='tienePrimaria'
 ```
 
 ```{r}
-data$EducacionUni= data$`Educacion  Uni `[,c(1,4:6,8:9)]
-names(data$EducacionUni)
+Secu=ece20$EduBAS[ece20$EduBAS$TXCONCLUYOSECUNDARIA=="SI",c(1,3)]
+Secu=Secu[!duplicated(Secu$IDHOJAVIDA),]
+Secu=Secu[complete.cases(Secu),]
+names(Secu)[2]='tieneSecundaria'
 ```
 
+names(ece20$EduTEC)
 ```{r}
-data$EducacionPostgrado= data$`Educacion  Postgrado `[,c(5,7,12)]
-names(data$EducacionPostgrado)
+Tecs=ece20$EduTEC[ece20$EduTEC$TXCONCLUYO=="SI",c(1,3,5)]
+Tecs=Tecs[!duplicated(Tecs$IDHOJAVIDA),]
+Tecs=Tecs[complete.cases(Tecs),]
+names(Tecs)[2]='tieneTec'
 ```
 
+####
 ```{r}
-data$EDUCACIONBASICAS[data$EDUCACIONBASICAS$TXCONCLUYOPRIMARIA=='SI' & data$EDUCACIONBASICAS$TXCONCLUYOSECUNDARIA=='NO', ]
-```
-
-```{r}
-data$EDUCACIONBASICAS <- data$EDUCACIONBASICAS[!duplicated(data$EDUCACIONBASICAS), ]
-
-nrow(data$EDUCACIONBASICAS)
-```
-
-```{r}
-data$EDUCACIONTECNICAS<- data$EDUCACIONTECNICAS[!duplicated(data$EDUCACIONTECNICAS), ]
-
-nrow(data$EDUCACIONTECNICAS)
-```
-```{r}
-names(data$EducacionUni)
-```
-
-```{r}
-data$EducacionUni[2]= as.factor(ifelse(data$EducacionUni[2]=="SI", 1,0))
-levels(data$EducacionUni[2])=c("Con bachiller","Sin bachiller") #asignamos etiquetas
-
-data$EducacionUni<- data$EducacionUni[order(data$EducacionUni["IDHOJAVIDA"], data$EducacionUni["TXBACHILLER"], decreasing=TRUE),]
-
-data$EducacionUni1 <- data$EducacionUni[!duplicated(data$EducacionUni[1]),]
-
-nrow(data$EducacionUni1)
-```
-```{r}
-names(data$EducacionPostgrado)
+Bachis=ece20$EduUNI[ece20$EduUNI$TXBACHILLER=="SI",c("IDHOJAVIDA","TXBACHILLER","TXANIOBACHILLER","TXUNIVERSIDAD")]
+Bachis=Bachis[complete.cases(Bachis),]
+Bachis=Bachis[!duplicated(Bachis$IDHOJAVIDA),]
+names(Bachis)[2:4]=c('tieneBach','FechaBach','UniBach')
 ```
 
 
 ```{r}
-data$EducacionPostgrado[3]= as.factor(ifelse(data$EducacionPostgrado[3]=="1", 1,0))
-levels(data$EducacionPostgrado[3])=c("Con posgrado","Sin posgrado") #asignamos etiquetas
-
-data$EducacionPostgrado<- data$EducacionPostgrado[order(data$EducacionPostgrado["IDHOJAVIDA"], data$EducacionPostgrado["FGTENGOPOSGRADO"], decreasing=TRUE),]
-
-data$EducacionPostgrado2 <- data$EducacionPostgrado[!duplicated(data$EducacionPostgrado[2]),]
-
-nrow(data$EducacionPostgrado2)
-```
-```{r}
-table(data$EducacionPostgrado2[3])
+Lics=ece20$EduUNI[ece20$EduUNI$TXTITULO=="SI",c("IDHOJAVIDA","TXTITULO","TXANIOTITULO")]
+Lics=Lics[complete.cases(Lics),]
+Lics=Lics[!duplicated(Lics$IDHOJAVIDA),]
+names(Lics)[2:3]=c('tieneTit','FechaTit')
 ```
 
 ```{r}
-data_total=merge(data$EDUCACIONBASICAS,data$EDUCACIONTECNICAS,by="IDHOJAVIDA")
+Magis=ece20$EduPOST[ece20$EduPOST$TXGRADO=='MAESTRO' & ece20$EduPOST$FGTENGOPOSGRADO==1,c(7,2,3)]
+Magis=Magis[complete.cases(Magis),]
+Magis=Magis[!duplicated(Magis$IDHOJAVIDA),]
+names(Magis)[2:3]=c('tieneMAG','UniMAG')
 ```
 
 ```{r}
-data_totalF=merge(data_total,data$EducacionUni1,by="IDHOJAVIDA")
+Doct=ece20$EduPOST[ece20$EduPOST$TXGRADO=='DOCTOR' & ece20$EduPOST$FGTENGOPOSGRADO==1,c(7,2,3)]
+Doct=Doct[complete.cases(Doct),]
+Doct=Doct[!duplicated(Doct$IDHOJAVIDA),]
+names(Doct)[2:3]=c('tieneDOC','UniDOC')
 ```
 
-```{r}
-data_totalFi=merge(data_totalF,data$EducacionPostgrado2,by="IDHOJAVIDA")
-```
 
 ```{r}
-#### Merge
 
 library(readxl)
-Datos_Candidatos_ECE2020 <- read_excel("Datos Candidatos ECE2020.xlsx")
-head(Datos_Candidatos_ECE2020)
-```
-
-```{r}
-data_totalFinal=merge(data_totalFi,Datos_Candidatos_ECE2020,by.x="IDHOJAVIDA",by.y="IDHOJAVIDA...1",all.y=T)
-```
-
-```{r}
-names(Datos_Candidatos_ECE2020)
-```
-
-```{r}
-names(data_totalFinal)
-```
-
-*Ojo con el nivel 3*
-```{r}
-data_totalFinal$NivelEduc[data_totalFinal$TXCONCLUYOPRIMARIA== "NO"]  = "0"
-
-data_totalFinal$NivelEduc[data_totalFinal$TXCONCLUYOPRIMARIA== "SI"]  = "1"
-
-data_totalFinal$NivelEduc[data_totalFinal$TXCONCLUYOPRIMARIA== "SI"& data_totalFinal$TXCONCLUYOSECUNDARIA== "SI"]  = "2"
-
-data_totalFinal$NivelEduc[data_totalFinal$TXCONCLUYOPRIMARIA== "SI"&
-                          data_totalFinal$TXCONCLUYOSECUNDARIA== "SI"&
-                          data_totalFinal$FGTENGOEDUTECNICO=="1"|
-                          data_totalFinal$TXBACHILLER== "1"]  = "3"
-
-data_totalFinal$NivelEduc[data_totalFinal$TXCONCLUYOPRIMARIA== "SI" &
-                          data_totalFinal$TXCONCLUYOSECUNDARIA== "SI"&
-                          data_totalFinal$NivelEduc=="3"&
-                          data_totalFinal$FGTENGOPOSGRADO== "1"]  = "4"
-
-#Le damos formato:
-data_totalFinal$NivelEduc= factor(data_totalFinal$NivelEduc, 
-                        levels = c(0:4),
-                        labels = c("Sin educación", "Primaria", "Secundaria", "Estudios Postsecundarios","Posgrado"),
-                        ordered=T)
-str(data_totalFinal$NivelEduc)
+DataOfi =read_excel("Datos Candidatos ECE2020.xlsx")
+names(DataOfi)
 ```
 
 
 ```{r}
-table(data_totalFinal$NivelEduc)
-```
+names(DataOfi)[1]='IDHOJAVIDA'
+DataOfi$IDHOJAVIDA...11=NULL
 
-#### Creación de variable Juventud
-
-```{r}
-str(data_totalFinal$NUEDAD)
-```
-
-
-```{r}
-data_totalFinal$Juventud= as.factor(ifelse(data_totalFinal$NUEDAD<=30, 1,0))
-levels(data_totalFinal$Juventud)=c("Joven","No joven") #asignamos etiquetas
 ```
 
 ```{r}
-str(data_totalFinal$NUEDAD)
+PerfilACA=base::merge(DataOfi,Prim,all.x=T)
+PerfilACA=base::merge(PerfilACA,Secu,all.x=T)
+PerfilACA=base::merge(PerfilACA,Tecs,all.x=T)
+PerfilACA=base::merge(PerfilACA,Bachis,all.x=T)
+PerfilACA=base::merge(PerfilACA,Lics,all.x=T)
+PerfilACA=base::merge(PerfilACA,Magis,all.x=T)
+PerfilACA=base::merge(PerfilACA,Doct,all.x=T)
 ```
 
 ```{r}
-table(data_totalFinal$Juventud)
+PerfilACA$joven=ifelse(PerfilACA$NUEDAD>30,0,1)
 ```
 
 ```{r}
-table(data_totalFinal$Juventud,data_totalFinal$NivelEduc)
+names(PerfilACA)
+```
+
+```{r}
+PerfilACA=PerfilACA[,c(1:17,19,22,24,26,18,20,21,23,25,27,28)]
+```
+
+```{r}
+
+PerfilACA[,c(15:21)][is.na(PerfilACA[,c(15:21)])] = 0
+PerfilACA[,c(15:21)][PerfilACA[,c(15:21)]=='SI'] = 1
+PerfilACA[,c(15:21)]=lapply(PerfilACA[,c(15:21)],as.numeric)
+```
+
+```{r}
+PerfilACA$nivelACAD=apply(PerfilACA[,c(15:21)],1,sum)
+```
+```{r}
+write.csv(PerfilACA,"PerfilACA.csv",row.names = F)
 ```
 
