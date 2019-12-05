@@ -1,0 +1,47 @@
+### CANDIDATURAS FINALES
+
+```{r}
+library(rio)
+Candidaturas<-import("https://github.com/ChiaraZamoraM/JNE/raw/master/ECE%202020/Candidaturas_05_12.xlsx")
+head(Candidaturas)
+```
+
+```{r}
+library(rio)
+url <- "https://github.com/ChiaraZamoraM/JNE/raw/master/ECE%202020/PerfilACA.csv"
+PerfilACA <- import(url)
+head(PerfilACA)
+```
+
+```{r}
+names(Candidaturas)
+```
+
+```{r}
+Candidaturas=Candidaturas[,-c(1:4,6:10,12,13,17,18)]
+```
+
+```{r}
+names(Candidaturas)
+```
+
+```{r}
+names(PerfilACA)
+```
+
+```{r}
+Candidaturas$DNI=as.integer(Candidaturas$DNI)
+```
+
+```{r}
+PerfilFinal=merge(Candidaturas,PerfilACA,by.x="DNI",by.y="TXDOCUMENTOIDENTIDAD",all.x=TRUE)
+```
+
+```{r}
+PerfilFinal=PerfilFinal[!duplicated(PerfilFinal$DNI),]
+```
+
+```{r}
+write.csv(PerfilFinal,"PerfilFinal.csv",row.names = F)
+```
+
