@@ -32,7 +32,7 @@ datosACA$nivelACAD2= factor(datosACA$nivelACAD2,
 #Cambiar las etiquetas de los valores
 datosACA$joven= factor(datosACA$joven, 
                            levels = c(0:1),
-                           labels = c("mayor de 30", "30 o menos"),
+                           labels = c("Mayor de 30", "30 o menos"),
                            ordered=T)
 ```
 
@@ -47,7 +47,7 @@ datosACA$TXSEXO= factor(datosACA$TXSEXO,
 
 ```{r}
 all=as.data.frame(100*prop.table(table(datosACA$TXSEXO,datosACA$nivelACAD2,datosACA$joven),margin = 2))
-names(all)=c("sexo","nivelEducativo","joven","porcentaje")
+names(all)=c("Sexo","nivelEducativo","joven","porcentaje")
 ```
 
 
@@ -68,8 +68,11 @@ names(all2)=c("sexo","nivelEducativo","joven","porcentaje")
 ```
 
 ```{r}
-base=ggplot(data=all2, aes(x=nivelEducativo,y=porcentaje,fill=sexo))
-base +   geom_bar(stat="identity",position = 'dodge') +facet_grid(joven~.) + coord_flip() +theme_linedraw() + theme(legend.position="bottom")
+FormAcad=ggplot(data=all2, aes(x=nivelEducativo,y=porcentaje,fill=Sexo)) +   geom_bar(stat="identity",position = 'dodge') +facet_grid(joven~.) +theme_gray() + theme(legend.position="bottom") +
+  geom_text(aes(label = porcentaje), position=position_dodge(width = 1),hjust=-0.5) + coord_flip() +
+  xlab("Nivel educativo") + ylab("") + 
+  ggtitle("Nivel educativo de las candidaturas congresales") +  theme(plot.title = element_text(vjust=2, hjust = 0.5))
+FormAcad
 ```
 
 
