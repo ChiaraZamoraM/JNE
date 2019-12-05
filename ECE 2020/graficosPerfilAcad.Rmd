@@ -1,0 +1,105 @@
+```{r}
+library(ggplot2) # Cargar la librería gráfica "ggplot2"
+library(readr) # Cargar la librería lectura BD "readr"
+```
+
+```{r}
+link="https://github.com/ChiaraZamoraM/JNE/raw/master/ECE%202020/PerfilACA.csv"
+datosACA=read.csv(link, stringsAsFactors = F)
+```
+```{r}
+datosACA$nivelACAD= factor(datosACA$nivelACAD, 
+                                  levels = c(0:7),
+                                  labels = c("Sin educación", "Primaria","Secundaria","Técnico",
+                                             "Bachiller","Licenciado",
+                                             "Magister","Doctor"),
+                                  ordered=T)
+
+```
+
+
+```{r}
+#Cambiar las etiquetas de los valores
+datosACA$joven= factor(datosACA$joven, 
+                           levels = c(0:1),
+                           labels = c("mayor de 30", "30 o menos"),
+                           ordered=T)
+```
+
+
+```{r}
+datosACA$TXSEXO= factor(datosACA$TXSEXO, 
+                       levels = c(1:2),
+                       labels = c("Masculino", "Femenino"),
+                       ordered=T)
+```
+
+
+```{r}
+#Cantidad de joven por nivel educativo
+#table(datosACA$nivelACAD,datosACA$joven)
+juventudFinal=table(datosACA$nivelACAD,datosACA$joven)
+juventudFinal=as.data.frame(juventudFinal)
+#juventudFinal
+names(juventudFinal)=c("Nivel","Poblacion","Cantidad")
+
+```
+
+
+```{r}
+#Cantidad de hombres y mujeres por nivel educativo
+table(datosACA$nivelACAD,datosACA$TXSEXO)
+SexoFinal=table(datosACA$nivelACAD,datosACA$TXSEXO)
+SexoFinal=as.data.frame(SexoFinal)
+SexoFinal
+names(SexoFinal)=c("Nivel","Sexo","Cantidad")
+names(SexoFinal)
+```
+
+
+```{r}
+#Gráfica de nivel educativo por sexo
+Sexo=ggplot(data=SexoFinal, aes(x=Nivel, y=Cantidad, fill=Sexo)) + 
+  geom_bar(stat="identity", position="dodge") +
+  xlab("") + ylab("") +
+  ggtitle("Nivel educativo de las candidaturas congresales por sexo") +
+  theme(plot.title = element_text(vjust=2, hjust = 0.5)) +
+  theme (legend.position = "bottom",text = element_text(size=16)) +  
+  scale_fill_manual(values = c("#0072B2","#CC79A7")) + 
+  geom_text(aes(label=Cantidad), position=position_dodge(width=0.9), vjust=-0.4, size=4)
+Sexo
+```
+
+#Gráfica de nivel educativo por tipo de poblacion (joven y no joven)
+```{r}
+Jovenes=ggplot(data=juventudFinal, aes(x=Nivel, y=Cantidad, fill=Poblacion)) + 
+  geom_bar(stat="identity", position="dodge") +
+  xlab("") + ylab("") +
+  ggtitle("Nivel educativo de las candidaturas congresales por problación") +
+  theme(plot.title = element_text(vjust=2, hjust = 0.5)) +
+  theme (legend.position = "bottom",text = element_text(size=16)) +  
+  scale_fill_manual(name="Población",values = c("#009E73","#F0E442"))+
+  geom_text(aes(label=Cantidad), position=position_dodge(width=0.9), vjust=-0.4, size=4)
+
+Jovenes
+```
+```{r}
+all=as.data.frame(100*prop.table(table(datosACA$TXSEXO,datosACA$joven,datosACA$nivelACAD),margin = 2))
+names(all)=c("sexo","joven","nivelEducativo","porcentaje")
+```
+
+
+```{r}
+base=ggplot(data=all, aes(x=nivelEducativo,y=porcentaje,fill=sexo))
+base +   geom_bar(stat="identity") +facet_wrap( ~joven ,nrow = 1) + coord_flip() +theme_classic() + theme(legend.position="bottom")
+```
+```{r}
+base=ggplot(data=all, aes(x=nivelEducativo,y=porcentaje,fill=sexo))
+base +   geom_bar(stat="identity",position = 'dodge') +facet_grid( ~joven) + coord_flip() +theme_classic() + theme(legend.position="bottom") 
+```
+#Guardar gráficas en png
+aspect_ratio=3
+ggsave("Sexo.png", plot = Sexo, height = 9, width = 7* aspect_ratio)
+ggsave("Jovenes.png", plot = Jovenes, height = 9, width = 7 * aspect_ratio)
+
+
