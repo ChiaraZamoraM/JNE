@@ -30,12 +30,12 @@ names(data$EDUCACIONTECNICAS)
 ```
 
 ```{r}
-data$EducacionUni= data$EducacionUni[,c(1,4:6,8:9)]
+data$EducacionUni= data$`Educacion  Uni `[,c(1,4:6,8:9)]
 names(data$EducacionUni)
 ```
 
 ```{r}
-data$EducacionPostgrado= data$EducacionPostgrado[,c(5,7,12)]
+data$EducacionPostgrado= data$`Educacion  Postgrado `[,c(5,7,12)]
 names(data$EducacionPostgrado)
 ```
 
@@ -156,7 +156,7 @@ str(data_totalFinal$NUEDAD)
 
 ```{r}
 data_totalFinal$Juventud= as.factor(ifelse(data_totalFinal$NUEDAD<=30, 1,0))
-levels(data_totalFinal$Juventud)=c("Joven","No joven") #asignamos etiquetas
+levels(data_totalFinal$Juventud)=c("No joven","Joven") #asignamos etiquetas
 ```
 
 ```{r}
@@ -169,5 +169,19 @@ table(data_totalFinal$Juventud)
 
 ```{r}
 table(data_totalFinal$Juventud,data_totalFinal$NivelEduc)
+``` 
+
+
+```{r}
+library(readxl)
+Candidaturas_9_12 <- read_excel("~/GitHub/JNE/ECE 2020/Candidaturas 9.12.xlsx")
+head(Candidaturas_9_12)
+```
+```{r}
+names(data_totalFinal)
+```
+
+```{r}
+FinalEduc=merge(data_totalFinal,Candidaturas_9_12,by.x="TXDOCUMENTOIDENTIDAD",by.y="DNI")
 ```
 
