@@ -1,0 +1,177 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r}
+library(readxl)
+Hojas_de_vida_ECE2020 <- read_excel("Hojas de vida ECE2020.xlsx",sheet=7)
+head(Hojas_de_vida_ECE2020)
+```
+```{r}
+names(Hojas_de_vida_ECE2020)
+```
+```{r}
+Hojas_de_vida_ECE2020=Hojas_de_vida_ECE2020[,-c(11:13)]
+```
+
+
+```{r}
+table(Hojas_de_vida_ECE2020$FGCARGOELECCION)
+```
+
+```{r}
+nrow(Hojas_de_vida_ECE2020)
+```
+
+```{r}
+library(readxl)
+Datos_Candidatos_ECE2020 <- read_excel("Datos Candidatos ECE2020.xlsx")
+head(Datos_Candidatos_ECE2020)
+```
+```{r}
+Datos_Candidatos_ECE2020=Datos_Candidatos_ECE2020[,c(1,2)]
+```
+
+```{r}
+library(readxl)
+Candidaturas_05_12 <- read_excel("Candidaturas_05_12.xlsx")
+head(Candidaturas_05_12)
+```
+
+
+```{r}
+HojaConDNI=merge(Hojas_de_vida_ECE2020,Datos_Candidatos_ECE2020,by.x = "IDHOJAVIDA", by.y="IDHOJAVIDA...1")
+```
+
+```{r}
+names(HojaConDNI)
+```
+```{r}
+names(Candidaturas_05_12)
+```
+
+```{r}
+Candidaturas_05_12=Candidaturas_05_12[,-c(1:3,11,14:18)]
+```
+
+```{r}
+trayectoria= merge(HojaConDNI,Candidaturas_05_12,by.x="TXDOCUMENTOIDENTIDAD",by.y ="DNI")
+```
+
+
+```{r}
+names(trayectoria)
+```
+
+####Tipos de cargos
+```{r}
+trayectoria$ambito[trayectoria$TXCARGOELECCION2=="ALCADE(SA) DE CENTRO POBLADO"|trayectoria$TXCARGOELECCION2=="ALCALDE DISTRITAL"|trayectoria$TXCARGOELECCION2=="ALCALDE PROVINCIAL"|trayectoria$TXCARGOELECCION2=="REGIDOR DISTRITAL"|trayectoria$TXCARGOELECCION2=="REGIDOR PROVINCIAL"]="Gestion local"
+
+trayectoria$ambito[trayectoria$TXCARGOELECCION2=="CONSEJERO REGIONAL"|trayectoria$TXCARGOELECCION2=="GOBERNADOR REGIONAL"|trayectoria$TXCARGOELECCION2=="VICEGOBERNADOR REGIONAL"]="Gestion regional"
+
+trayectoria$ambito[trayectoria$TXCARGOELECCION2=="CONGRESISTA"|trayectoria$TXCARGOELECCION2=="DIPUTADO"|trayectoria$TXCARGOELECCION2=="REPRESENTANTE EN EL PARLAMENTO ANDINO"|trayectoria$TXCARGOELECCION2=="SENADOR"]="Gestion legislativa"
+
+trayectoria$ambito[trayectoria$TXCARGOELECCION2=="PRIMER VICEPRESIDENTE DE LA REPÚBLICA"]="Gestion ejecutiva"
+
+table(trayectoria$ambito)
+```
+
+####Tiempo por cargo
+
+```{r}
+trayectoria$TXANIOCARGOELECHASTA[trayectoria$TXANIOCARGOELECHASTA=="HASTA LA ACTUALIDAD"]=2019
+```
+
+```{r}
+trayectoria$TXANIOCARGOELECDESDE=as.numeric(trayectoria$TXANIOCARGOELECDESDE)
+trayectoria$TXANIOCARGOELECHASTA=as.numeric(trayectoria$TXANIOCARGOELECHASTA)
+```
+
+```{r}
+trayectoria$tiempoenelcargo=trayectoria$TXANIOCARGOELECHASTA-trayectoria$TXANIOCARGOELECDESDE
+```
+
+```{r}
+trayectoria$tiempoenelcargo=as.numeric(trayectoria$tiempoenelcargo)
+```
+
+```{r}
+table(trayectoria$TXANIOCARGOELECDESDE)
+```
+
+### Terminado años de experiencia
+
+```{r}
+tiempo=aggregate(tiempoenelcargo ~ IDHOJAVIDA, data=trayectoria, sum)
+```
+
+```{r}
+summary(tiempo$tiempoenelcargo)
+```
+
+####Numero de cargos
+```{r}
+
+trayectoria$NUITEMCARGOELECCIONrec[trayectoria$FGCARGOELECCION==1&trayectoria$NUITEMCARGOELECCION==2]=2
+trayectoria$NUITEMCARGOELECCIONrec[trayectoria$FGCARGOELECCION==1&trayectoria$NUITEMCARGOELECCION==1]=1
+trayectoria$NUITEMCARGOELECCIONrec[trayectoria$FGCARGOELECCION==2&trayectoria$NUITEMCARGOELECCION==1]=0
+
+```
+
+
+```{r}
+trayectoria=trayectoria[order(trayectoria$IDHOJAVIDA, trayectoria$NUITEMCARGOELECCIONrec, decreasing=TRUE),]
+
+cargo2=trayectoria[duplicated(trayectoria$IDHOJAVIDA),]
+
+nrow(cargo2)
+```
+```{r}
+names(trayectoria)
+```
+
+```{r}
+
+cargo2=cargo2[c("IDHOJAVIDA","IDORGPOLCARGOELEC","TXORGPOLCARGOELEC","TXANIOCARGOELECDESDE","TXANIOCARGOELECHASTA","TXCARGOELECCION2","ambito","tiempoenelcargo")]
+
+names(cargo2)
+```
+
+```{r}
+trayectoriacar=merge(trayectoria,cargo2,by=c("IDHOJAVIDA"),all.x = T)
+```
+
+```{r}
+names(trayectoriacar)
+```
+
+```{r}
+trayectoriacar=trayectoriacar[order(trayectoriacar$IDHOJAVIDA, trayectoriacar$NUITEMCARGOELECCIONrec, decreasing=TRUE),]
+
+trayectoriafinal=trayectoriacar[!duplicated(trayectoriacar$IDHOJAVIDA),]
+```
+
+```{r}
+names(trayectoriafinal)
+```
+
+```{r}
+trayectoriafinal$experiencia=trayectoriafinal$tiempoenelcargo.x+trayectoriafinal$tiempoenelcargo.y
+```
+
+```{r}
+names(trayectoriafinal)
+```
+
+```{r}
+trayectoriafinal=trayectoriafinal[c(1,2,19,18,17,20:22,12:15,3,4,25,6:9,11,23,24,26:32,33)]
+```
+
+
+```{r}
+write.csv(trayectoriafinal,"trayectoriafinal.csv")
+```
+
+
+
+
