@@ -1,0 +1,42 @@
+
+```{r}
+library(readxl)
+formacion_acotada <- read_excel("formacion acotada.xlsx")
+names(formacion_acotada)
+```
+
+```{r}
+names(formacion_acotada)[names(formacion_acotada) == "Partido Político"] <- "partido"
+```
+
+```{r}
+names(formacion_acotada)
+```
+```{r}
+formacion_acotada$Porcentaje=round(formacion_acotada$Porcentaje*100,0)
+```
+
+```{r}
+library(ggplot2)
+library(tidyr)
+```
+
+```{r}
+formacion_acotada$Nivel[formacion_acotada$Nivel=='Estudios Superiores']="PosSecundaria"
+orderedEdu=c("Sin educación",'Primaria','Secundaria','PosSecundaria','Posgrado')
+formacion_acotada$Nivel=ordered(formacion_acotada$Nivel,levels=orderedEdu)
+```
+
+
+```{r}
+p1 <- ggplot( formacion_acotada, aes( x = Partido, y = Porcentaje,label=Porcentaje )) + 
+      geom_bar( stat = "identity" ) + 
+      facet_wrap( ~ Nivel,nrow = 2 ) + 
+      geom_text(size = 2, color = "black",hjust =0)
+p1 + theme_classic() + theme( axis.text.x = element_text( angle = 90),
+                         axis.text.y = element_text( size = 5) )+ coord_flip()
+```
+
+
+
+
