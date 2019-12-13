@@ -1,41 +1,109 @@
-
+---
+output:
+  pdf_document: default
+  html_document: default
+---
 ```{r}
+library(ggplot2)
+library(tidyr)
 library(readxl)
 formacion_acotada <- read_excel("formacion acotada.xlsx")
 names(formacion_acotada)
 ```
-
-```{r}
-names(formacion_acotada)[names(formacion_acotada) == "Partido Político"] <- "partido"
-```
-
-```{r}
-names(formacion_acotada)
-```
 ```{r}
 formacion_acotada$Porcentaje=round(formacion_acotada$Porcentaje*100,0)
-```
-
-```{r}
-library(ggplot2)
-library(tidyr)
-```
-
-```{r}
 formacion_acotada$Nivel[formacion_acotada$Nivel=='Estudios Superiores']="PosSecundaria"
 orderedEdu=c("Sin educación",'Primaria','Secundaria','PosSecundaria','Posgrado')
 formacion_acotada$Nivel=ordered(formacion_acotada$Nivel,levels=orderedEdu)
 ```
 
+```{r}
+edu0 = ggplot( formacion_acotada, aes( x = Partido, y = Porcentaje))
+edu0 = edu0 + geom_bar(stat = "identity",width = 0.5) 
+edu0 = edu0 + facet_wrap( ~ Nivel,nrow = 2 ) 
+edu0 = edu0 + geom_text(aes(label=ifelse(Porcentaje>0,Porcentaje,"")),size = 2, color = "black",hjust =0)
+edu0 = edu0 + theme_minimal() 
+edu0 = edu0 + theme( axis.text.x = element_text( angle = 90),
+                     axis.text.y = element_text( size = 5) )+ coord_flip()
+edu0
+```
 
 ```{r}
-p1 <- ggplot( formacion_acotada, aes( x = Partido, y = Porcentaje,label=Porcentaje )) + 
-      geom_bar( stat = "identity" ) + 
-      facet_wrap( ~ Nivel,nrow = 2 ) + 
-      geom_text(size = 2, color = "black",hjust =0)
-p1 + theme_classic() + theme( axis.text.x = element_text( angle = 90),
-                         axis.text.y = element_text( size = 5) )+ coord_flip()
+edu1 = ggplot( formacion_acotada, aes( x = Partido, y = Porcentaje))
+edu1 = edu1 + geom_bar(stat = "identity",width = 0.5) 
+edu1 = edu1 + facet_wrap( ~ Nivel,nrow = 1 ) 
+edu1 = edu1 + geom_text(aes(label=ifelse(Porcentaje>0,Porcentaje,"")),size = 2, color = "black",hjust =0)
+edu1 = edu1 + theme_minimal() 
+edu1 = edu1 + theme( axis.text.x = element_text( angle = 90),
+                     axis.text.y = element_text( size = 5) )+ coord_flip()
+edu1
 ```
+
+```{r}
+library(data.table)   
+edu_DT=setDT(formacion_acotada)
+# create dummy var which reflects order when sorted alphabetically
+edu_DT[, ord := sprintf("%02i", frank(edu_DT, -Nivel,
+                                      -Porcentaje,
+                                      ties.method = "first"))]
+edu_DT=edu_DT[edu_DT$Porcentaje>0,]
+```
+
+```{r}
+
+library(ggplot2)
+
+edu2 = ggplot(edu_DT,aes(x = ord, y = Porcentaje)) 
+edu2 = edu2 + geom_bar(stat = 'identity',show.legend = F,width = 0.4)
+edu2 = edu2 + facet_wrap(~ Nivel,nrow = 1,scales = "free") + theme_classic() 
+edu2 = edu2 + scale_x_discrete(labels = molten[, setNames(as.character(Partido), ord)])
+edu2 = edu2 + theme( axis.text.x = element_text( angle = 80,size = 4,hjust = 1),
+                     axis.text.y = element_text( size = 3) )
+edu2
+```
+```{r}
+edu3 = ggplot(molten, aes(x=ord,
+                          y=Porcentaje,
+                          label=Porcentaje)) + theme_classic() 
+
+edu3= edu3 + geom_segment(aes(y = 0, #from
+                              yend = Porcentaje, #to
+                              x = ord,#from
+                              xend = ord),#to
+                          color = "gray")
+
+edu3= edu3 + geom_point(size=4) 
+edu3= edu3 + geom_text(show.legend = FALSE,color='white',size=2)
+edu3= edu3 + facet_wrap(~ Nivel,nrow = 1,scales = "free",drop = T)
+edu3= edu3 + scale_x_discrete(labels = molten[, setNames(as.character(Partido), ord)]) 
+edu3= edu3 + theme( axis.text.x = element_text( angle = 80,size = 4,hjust = 1),
+                    axis.text.y = element_text( size = 3) )
+edu3
+```
+
+
+```{r}
+edu4 = ggplot(molten, aes(x=ord,
+                          y=Porcentaje,
+                          label=Porcentaje))
+
+edu4= edu4 + geom_segment(aes(y = 0, #from
+                              yend = Porcentaje, #to
+                              x = ord,#from
+                              xend = ord),#to
+                          color = "gray")
+
+edu4= edu4 + geom_point(size=4) 
+edu4= edu4 + geom_text(show.legend = FALSE,color='black',size=2,check_overlap = TRUE,vjust = -1.5) 
+edu4= edu4 + facet_wrap(~ Nivel,nrow = 1,scales = "free",drop = T) + theme_classic() 
+edu4= edu4 + scale_x_discrete(labels = molten[, setNames(as.character(Partido), ord)]) 
+edu4= edu4 + labs(title = "Nivel maximo alcanzado de educación",xlab="Partido",ylab='% de postulantes')
+edu4= edu4 + theme( axis.text.x = element_text( angle = 80,size = 4,hjust = 1),
+                    axis.text.y = element_text( size = 3))
+
+edu4
+```
+
 
 
 
