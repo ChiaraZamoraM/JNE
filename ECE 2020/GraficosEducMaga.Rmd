@@ -22,18 +22,24 @@ edu0 = ggplot( formacion_acotada, aes( x = Partido, y = Porcentaje))
 edu0 = edu0 + geom_bar(stat = "identity",width = 0.5) 
 edu0 = edu0 + facet_wrap( ~ Nivel,nrow = 2 ) 
 edu0 = edu0 + geom_text(aes(label=ifelse(Porcentaje>0,Porcentaje,"")),size = 2, color = "black",hjust =0)
-edu0 = edu0 + theme_minimal() 
+edu0 = edu0 + theme_minimal() + scale_x_discrete(limits=FTcri$Crimes)
 edu0 = edu0 + theme( axis.text.x = element_text( angle = 90),
                      axis.text.y = element_text( size = 5) )+ coord_flip()
 edu0
 ```
 
+
 ```{r}
-edu1 = ggplot( formacion_acotada, aes( x = Partido, y = Porcentaje))
+formacion_acotadaN=formacion_acotada[order(formacion_acotada$Nivel,formacion_acotada$Porcentaje),]
+xticksss=formacion_acotadaN[formacion_acotadaN$Nivel=='PosSecundaria','Partido']
+```
+
+```{r}
+edu1 = ggplot( formacion_acotadaN, aes( x = Partido, y = Porcentaje))
 edu1 = edu1 + geom_bar(stat = "identity",width = 0.5) 
 edu1 = edu1 + facet_wrap( ~ Nivel,nrow = 1 ) 
 edu1 = edu1 + geom_text(aes(label=ifelse(Porcentaje>0,Porcentaje,"")),size = 2, color = "black",hjust =0)
-edu1 = edu1 + theme_minimal() 
+edu1 = edu1 + theme_minimal() + scale_x_discrete(limits=xticksss[[1]])
 edu1 = edu1 + theme( axis.text.x = element_text( angle = 90),
                      axis.text.y = element_text( size = 5) )+ coord_flip()
 edu1
@@ -55,14 +61,14 @@ library(ggplot2)
 
 edu2 = ggplot(edu_DT,aes(x = ord, y = Porcentaje)) 
 edu2 = edu2 + geom_bar(stat = 'identity',show.legend = F,width = 0.4)
-edu2 = edu2 + facet_wrap(~ Nivel,nrow = 1,scales = "free") + theme_classic() 
-edu2 = edu2 + scale_x_discrete(labels = molten[, setNames(as.character(Partido), ord)])
+edu2 = edu2 + facet_wrap(~ Nivel,nrow = 1,scales = "free_x") + theme_classic() 
+edu2 = edu2 + scale_x_discrete(labels = edu_DT[, setNames(as.character(Partido), ord)])
 edu2 = edu2 + theme( axis.text.x = element_text( angle = 80,size = 4,hjust = 1),
                      axis.text.y = element_text( size = 3) )
 edu2
 ```
 ```{r}
-edu3 = ggplot(molten, aes(x=ord,
+edu3 = ggplot(edu_DT, aes(x=ord,
                           y=Porcentaje,
                           label=Porcentaje)) + theme_classic() 
 
@@ -74,16 +80,16 @@ edu3= edu3 + geom_segment(aes(y = 0, #from
 
 edu3= edu3 + geom_point(size=4) 
 edu3= edu3 + geom_text(show.legend = FALSE,color='white',size=2)
-edu3= edu3 + facet_wrap(~ Nivel,nrow = 1,scales = "free",drop = T)
-edu3= edu3 + scale_x_discrete(labels = molten[, setNames(as.character(Partido), ord)]) 
+edu3= edu3 + facet_wrap(~ Nivel,nrow = 1,scales = "free_x",drop = T)
+edu3= edu3 + scale_x_discrete(labels = edu_DT[, setNames(as.character(Partido), ord)]) 
 edu3= edu3 + theme( axis.text.x = element_text( angle = 80,size = 4,hjust = 1),
                     axis.text.y = element_text( size = 3) )
-edu3
+edu3 + labs(title = "Nivel maximo alcanzado de educación") + ylab('% de postulantes (orden descendente)') + xlab("Partido")
 ```
 
 
 ```{r}
-edu4 = ggplot(molten, aes(x=ord,
+edu4 = ggplot(edu_DT, aes(x=ord,
                           y=Porcentaje,
                           label=Porcentaje))
 
@@ -95,13 +101,12 @@ edu4= edu4 + geom_segment(aes(y = 0, #from
 
 edu4= edu4 + geom_point(size=4) 
 edu4= edu4 + geom_text(show.legend = FALSE,color='black',size=2,check_overlap = TRUE,vjust = -1.5) 
-edu4= edu4 + facet_wrap(~ Nivel,nrow = 1,scales = "free",drop = T) + theme_classic() 
-edu4= edu4 + scale_x_discrete(labels = molten[, setNames(as.character(Partido), ord)]) 
-edu4= edu4 + labs(title = "Nivel maximo alcanzado de educación",xlab="Partido",ylab='% de postulantes')
+edu4= edu4 + facet_wrap(~ Nivel,nrow = 1,scales = "free_x",drop = T) + theme_classic() 
+edu4= edu4 + scale_x_discrete(labels = edu_DT[, setNames(as.character(Partido), ord)]) 
 edu4= edu4 + theme( axis.text.x = element_text( angle = 80,size = 4,hjust = 1),
                     axis.text.y = element_text( size = 3))
 
-edu4
+edu4 + labs(title = "Nivel maximo alcanzado de educación") + ylab('% de postulantes (orden descendente)') + xlab("Partido")
 ```
 
 
