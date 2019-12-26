@@ -1,0 +1,56 @@
+```{r, eval=FALSE}
+# instalar:
+library(sp)
+library(geojsonio)
+library(rgdal)
+
+fromGit="https://github.com/ChiaraZamoraM/JNE/raw/master/ECE%202020/mapa/mergedECE2020.json" # link desde github
+
+PeruMapa <- rgdal::readOGR(fromGit,stringsAsFactors = FALSE)
+
+```
+
+
+
+Sin problema, el mapa se dibujará.
+```{r, eval=FALSE}
+plot(PeruMapa, border='grey')
+```
+
+Como tenemos que combinar la data con el cluster y el mapa, veamos en el mapa donde aparece el nombre de la provincia:
+
+```{r, eval=FALSE}
+head(PeruMapa@data)
+```
+
+
+Podemos ver que en NAME_2 estan los nombres de provincias (ordenados):
+```{r, eval=FALSE}
+sort(PeruMapa@data$NAME_2)
+```
+
+Se parecen a los que tenemos?
+```{r, eval=FALSE}
+provinciasNew$provinciaNombre
+```
+
+Como hay acentos los eliminamos:
+
+```{r, eval=FALSE}
+library(stringi)
+
+PeruMapa$NAME_2=stri_trans_general(str = PeruMapa$NAME_2, 
+                                        id = "Latin-ASCII")
+provinciasNew$provinciaNombre=stri_trans_general(str = provinciasNew$provinciaNombre, 
+                                        id = "Latin-ASCII")
+
+```
+
+
+Probemos el merge:
+
+```{r, eval=FALSE}
+test=merge(PeruMapa@data,provinciasNew,by.x='NAME_2',by.y='provinciaNombre',all.x=T,all.y=T)
+test$id=NULL
+test[!complete.cases(test),]
+```
