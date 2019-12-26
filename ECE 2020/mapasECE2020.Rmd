@@ -17,40 +17,45 @@ Sin problema, el mapa se dibujará.
 plot(PeruMapa, border='grey')
 ```
 
-Como tenemos que combinar la data con el cluster y el mapa, veamos en el mapa donde aparece el nombre de la provincia:
+Como tenemos que combinar la data con el cluster y el mapa, veamos en el mapa donde aparece el nombre de la circunscripción:
 
 ```{r, eval=FALSE}
 head(PeruMapa@data)
 ```
 
 
-Podemos ver que en NAME_2 estan los nombres de provincias (ordenados):
-```{r, eval=FALSE}
-sort(PeruMapa@data$NAME_2)
+
+AHORA LA DATA:
+
+```{r}
+library(rio)
+LINKdata="https://github.com/ChiaraZamoraM/JNE/raw/master/ECE%202020/dataMapasECE.xlsx"
+dataCongre=import(LINKdata)
 ```
 
-Se parecen a los que tenemos?
-```{r, eval=FALSE}
-provinciasNew$provinciaNombre
+```{r}
+head(dataCongre)
 ```
 
-Como hay acentos los eliminamos:
+Merge:
 
 ```{r, eval=FALSE}
-library(stringi)
-
-PeruMapa$NAME_2=stri_trans_general(str = PeruMapa$NAME_2, 
-                                        id = "Latin-ASCII")
-provinciasNew$provinciaNombre=stri_trans_general(str = provinciasNew$provinciaNombre, 
-                                        id = "Latin-ASCII")
-
+mapacondata=merge(PeruMapa,dataCongre)
 ```
 
 
-Probemos el merge:
+grupos:
 
-```{r, eval=FALSE}
-test=merge(PeruMapa@data,provinciasNew,by.x='NAME_2',by.y='provinciaNombre',all.x=T,all.y=T)
-test$id=NULL
-test[!complete.cases(test),]
+```{r}
+(mapacondata$plot1data=cut(mapacondata$congresistas2020,
+                           breaks = c(0,3,7,36),
+                           ordered_result = T))
 ```
+
+Graficando nueva variable "plot1data":
+```{r}
+colores=c("red",'orange','green')
+plot(mapacondata,col=colores[mapacondata$plot1data],border=NA)
+```
+
+
