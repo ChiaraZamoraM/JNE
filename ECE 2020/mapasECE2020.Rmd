@@ -44,7 +44,7 @@ mapacondata=merge(PeruMapa,dataCongre)
 ```
 
 
-grupos:
+Crea grupos a colorear:
 
 ```{r}
 (mapacondata$plot1data=cut(mapacondata$congresistas2020,
@@ -53,9 +53,18 @@ grupos:
 ```
 
 Graficando nueva variable "plot1data":
+
 ```{r}
 colores=c("red",'orange','green')
-plot(mapacondata,col=colores[mapacondata$plot1data],border=NA)
+p=plot(mapacondata,col=colores[mapacondata$plot1data],
+     border=NA)
 ```
+Grabar como PDF
+```{r}
+pdf(file="plot1data.pdf")
+plot(mapacondata,col=colores[mapacondata$plot1data],border=NA)
+dev.off()
+```
+
 
 
