@@ -1,0 +1,115 @@
+```{r, eval=FALSE}
+# instalar:
+library(sp)
+library(geojsonio)
+library(rgdal)
+
+fromGit="https://github.com/ChiaraZamoraM/JNE/raw/master/ECE%202020/mapa/mergedECE2020.json" # link desde github
+
+PeruMapa <- rgdal::readOGR(fromGit,stringsAsFactors = FALSE)
+
+```
+
+
+
+Sin problema, el mapa se dibujará.
+```{r, eval=FALSE}
+plot(PeruMapa, border='grey')
+```
+
+Como tenemos que combinar la data con el cluster y el mapa, veamos en el mapa donde aparece el nombre de la circunscripción:
+
+```{r, eval=FALSE}
+head(PeruMapa@data)
+```
+
+
+
+AHORA LA DATA:
+
+```{r}
+library(rio)
+LINKdata="https://github.com/ChiaraZamoraM/JNE/raw/master/ECE%202020/dataMapasECE.xlsx"
+dataCongre=import(LINKdata)
+```
+
+```{r}
+head(dataCongre)
+```
+
+Merge:
+
+```{r, eval=FALSE}
+mapacondata=merge(PeruMapa,dataCongre)
+```
+
+
+Crea grupos a colorear:
+
+```{r}
+(mapacondata$plot1data=cut(mapacondata$congresistas2020,
+                           breaks = c(0,3,7,36),
+                           labels = c("3 o menos","4 a 7","mas de 7"),
+                           ordered_result = T))
+```
+
+Graficando nueva variable "plot1data":
+
+```{r}
+colores=c("red",'orange','green')
+plot(mapacondata,col=colores[mapacondata$plot1data],
+     border=NA)
+legend('topright', #ubicacion
+       legend = levels(mapacondata$plot1data), #values
+       fill = colores, #colors
+       cex = 0.75, #size 
+       bty = "n", # no box
+       title="Curules en juego")
+```
+Grabar como PDF
+```{r}
+pdf(file="plot1data.pdf")
+plot(mapacondata,col=colores[mapacondata$plot1data],
+     border=NA)
+legend('topright', #ubicacion
+       legend = levels(mapacondata$plot1data), #values
+       fill = colores, #colors
+       cex = 0.75, #size 
+       bty = "n", # no box
+       title="Curules en juego")
+dev.off()
+```
+
+
+```{r}
+library(tmap)
+
+base = tm_shape(mapacondata)
+capa1= base + tm_layout(main.title = "Mapa",
+                        main.title.position = 'center')
+# colorear a cada poligono
+capa2= capa1 + tm_polygons("plot1data", #variable 
+                           style='cat', 
+                           title="Curules", # de leyenda
+                           palette=colores) #colores
+# nombre a cada poligono
+capa3= capa2 + tm_text("DEPARTAMEN",size = 0.3,col = 'black') 
+
+#leyenda
+capa4= capa3 + tm_legend(title.size=1, # tamano titulo
+                         text.size=0.5, # tamano texto leyenda
+                         position = c("left","bottom"))
+
+
+```
+
+```{r}
+pdf(file="plot1data.pdf")
+capa4
+dev.off()
+```
+
+
+
+
+
